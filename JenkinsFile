@@ -13,10 +13,15 @@ pipeline {
                 git 'https://github.com/santiagoprado21/ecommerce-microservice-backend-app.git'
             }
         }
+        stage('Prepare') {
+            steps {
+                sh 'chmod +x user-service/gradlew'
+            }
+        }
         stage('Build & Test') {
             steps {
                 dir('user-service') {
-                    bat 'gradlew.bat clean build'
+                    sh './gradlew clean build'
                 }
             }
         }
