@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-       IMAGE_NAME = "santiagoprado21/user-service-container"
+       IMAGE_NAME = "santiagoprado21/santiagoprado21-user-service-container"
        IMAGE_TAG = "tagname"
         DOCKER_CREDENTIALS_ID = "dockerhub-credentials"
     }
