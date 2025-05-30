@@ -13,15 +13,13 @@ pipeline {
                 git 'https://github.com/santiagoprado21/ecommerce-microservice-backend-app.git'
             }
         }
-
         stage('Build & Test') {
             steps {
                 dir('user-service') {
-                    sh './gradlew clean build'
+                    bat 'gradlew.bat clean build'
                 }
             }
         }
-
         stage('Build Docker Image') {
             steps {
                 dir('user-service') {
@@ -31,7 +29,6 @@ pipeline {
                 }
             }
         }
-
         stage('Push Docker Image') {
             steps {
                 script {
