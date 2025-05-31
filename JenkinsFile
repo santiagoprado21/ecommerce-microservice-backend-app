@@ -1,9 +1,9 @@
 pipeline {
     agent any
     environment {
-       IMAGE_NAME = "santiagoprado21/santiagoprado21-user-service-container"
-       IMAGE_TAG = "tagname"
         DOCKER_CREDENTIALS_ID = "dockerhub-credentials"
+        DOCKER_USERNAME = "santiagoprado21"
+        VERSION = "0.1.0"
     }
 
     stages {
@@ -12,35 +12,120 @@ pipeline {
                 git 'https://github.com/santiagoprado21/ecommerce-microservice-backend-app.git'
             }
         }
-        stage('Prepare') {
-            steps {
-                sh 'chmod +x user-service/gradlew'
-            }
-        }
-        stage('Build & Test') {
-            steps {
-                dir('user-service') {
-                    sh './gradlew clean build'
+
+        stage('Build Services') {
+            parallel {
+                stage('Build User Service') {
+                    steps {
+                        dir('user-service') {
+                            sh './mvnw clean package -DskipTests'
+                            script {
+                                docker.build("${DOCKER_USERNAME}/user-service-ecommerce-boot:${VERSION}")
+                            }
+                        }
+                    }
                 }
-            }
-        }
-        stage('Build Docker Image') {
-            steps {
-                dir('user-service') {
-                    script {
-                        docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
+                stage('Build Product Service') {
+                    steps {
+                        dir('product-service') {
+                            sh './mvnw clean package -DskipTests'
+                            script {
+                                docker.build("${DOCKER_USERNAME}/product-service-ecommerce-boot:${VERSION}")
+                            }
+                        }
+                    }
+                }
+                stage('Build Order Service') {
+                    steps {
+                        dir('order-service') {
+                            sh './mvnw clean package -DskipTests'
+                            script {
+                                docker.build("${DOCKER_USERNAME}/order-service-ecommerce-boot:${VERSION}")
+                            }
+                        }
+                    }
+                }
+                stage('Build Payment Service') {
+                    steps {
+                        dir('payment-service') {
+                            sh './mvnw clean package -DskipTests'
+                            script {
+                                docker.build("${DOCKER_USERNAME}/payment-service-ecommerce-boot:${VERSION}")
+                            }
+                        }
+                    }
+                }
+                stage('Build Shipping Service') {
+                    steps {
+                        dir('shipping-service') {
+                            sh './mvnw clean package -DskipTests'
+                            script {
+                                docker.build("${DOCKER_USERNAME}/shipping-service-ecommerce-boot:${VERSION}")
+                            }
+                        }
+                    }
+                }
+                stage('Build Favourite Service') {
+                    steps {
+                        dir('favourite-service') {
+                            sh './mvnw clean package -DskipTests'
+                            script {
+                                docker.build("${DOCKER_USERNAME}/favourite-service-ecommerce-boot:${VERSION}")
+                            }
+                        }
                     }
                 }
             }
         }
-        stage('Push Docker Image') {
+
+        stage('Run Tests') {
+            steps {
+                sh './mvnw test'
+            }
+        }
+
+        stage('Push Docker Images') {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
-                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
+                        // Push all images
+                        docker.image("${DOCKER_USERNAME}/user-service-ecommerce-boot:${VERSION}").push()
+                        docker.image("${DOCKER_USERNAME}/product-service-ecommerce-boot:${VERSION}").push()
+                        docker.image("${DOCKER_USERNAME}/order-service-ecommerce-boot:${VERSION}").push()
+                        docker.image("${DOCKER_USERNAME}/payment-service-ecommerce-boot:${VERSION}").push()
+                        docker.image("${DOCKER_USERNAME}/shipping-service-ecommerce-boot:${VERSION}").push()
+                        docker.image("${DOCKER_USERNAME}/favourite-service-ecommerce-boot:${VERSION}").push()
                     }
                 }
             }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    // Apply Kubernetes configurations
+                    sh 'kubectl apply -f infrastructure/k8s/ --validate=false'
+                    
+                    // Wait for deployments to be ready
+                    sh '''
+                        kubectl rollout status deployment/user-service -n prod
+                        kubectl rollout status deployment/product-service -n prod
+                        kubectl rollout status deployment/order-service -n prod
+                        kubectl rollout status deployment/payment-service -n prod
+                        kubectl rollout status deployment/shipping-service -n prod
+                        kubectl rollout status deployment/favourite-service -n prod
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }

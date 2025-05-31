@@ -1,0 +1,47 @@
+groups:
+- name: service_alerts
+  rules:
+  - alert: ServiceDown
+    expr: up == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Service {{ $labels.job }} is down"
+      description: "Service {{ $labels.job }} has been down for more than 1 minute"
+
+  - alert: HighLatency
+    expr: http_server_requests_seconds_sum / http_server_requests_seconds_count > 0.5
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High latency in {{ $labels.service }}"
+      description: "Service {{ $labels.service }} has latency above 500ms"
+
+  - alert: HighErrorRate
+    expr: sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) / sum(rate(http_server_requests_seconds_count[5m])) > 0.05
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High error rate in {{ $labels.service }}"
+      description: "Service {{ $labels.service }} has error rate above 5%"
+
+  - alert: HighCPUUsage
+    expr: container_cpu_usage_seconds_total > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High CPU usage in {{ $labels.pod }}"
+      description: "Pod {{ $labels.pod }} has CPU usage above 80%"
+
+  - alert: HighMemoryUsage
+    expr: container_memory_usage_bytes / container_memory_working_set_bytes > 0.8
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High memory usage in {{ $labels.pod }}"
+      description: "Pod {{ $labels.pod }} has memory usage above 80%" 
