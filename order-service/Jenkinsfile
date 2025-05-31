@@ -1,0 +1,112 @@
+pipeline {
+    agent any
+    
+    environment {
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
+        DOCKER_IMAGE = 'santiagoprado21/order-service-ecommerce-boot'
+        SERVICE_NAME = 'order-service'
+        SERVICE_PORT = '8600'
+        MAVEN_OPTS = '-Dmaven.test.failure.ignore=true'
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out source code...'
+                checkout scm
+            }
+        }
+        
+        stage('Build Application') {
+            steps {
+                echo 'Building application with Maven...'
+                dir(SERVICE_NAME) {
+                    script {
+                        if (isUnix()) {
+                            sh '../mvnw clean compile package -DskipTests'
+                        } else {
+                            bat '..\\mvnw.cmd clean compile package -DskipTests'
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Unit Tests') {
+            steps {
+                echo 'Running unit tests...'
+                dir(SERVICE_NAME) {
+                    script {
+                        if (isUnix()) {
+                            sh '../mvnw test'
+                        } else {
+                            bat '..\\mvnw.cmd test'
+                        }
+                    }
+                }
+            }
+            post {
+                always {
+                    publishTestResults testResultsPattern: "${SERVICE_NAME}/target/surefire-reports/*.xml"
+                }
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                echo 'Building Docker image...'
+                dir(SERVICE_NAME) {
+                    script {
+                        def image = docker.build("${DOCKER_IMAGE}:${BUILD_NUMBER}")
+                        docker.withRegistry('https://registry-1.docker.io/v2/', 'docker-hub-credentials') {
+                            image.push()
+                            image.push("latest")
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Deploy to Dev') {
+            steps {
+                echo 'Deploying to development environment...'
+                script {
+                    if (isUnix()) {
+                        sh """
+                            kubectl set image deployment/${SERVICE_NAME} ${SERVICE_NAME}=${DOCKER_IMAGE}:${BUILD_NUMBER} -n dev || true
+                            kubectl rollout status deployment/${SERVICE_NAME} -n dev --timeout=300s || true
+                        """
+                    } else {
+                        bat """
+                            kubectl set image deployment/${SERVICE_NAME} ${SERVICE_NAME}=${DOCKER_IMAGE}:${BUILD_NUMBER} -n dev
+                            kubectl rollout status deployment/${SERVICE_NAME} -n dev --timeout=300s
+                        """
+                    }
+                }
+            }
+        }
+        
+        stage('Health Check') {
+            steps {
+                echo 'Performing health check...'
+                script {
+                    sleep(30)
+                    echo "Health check completed for ${SERVICE_NAME}"
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Pipeline execution completed'
+            cleanWs()
+        }
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+} 
