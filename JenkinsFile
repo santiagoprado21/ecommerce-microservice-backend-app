@@ -5,6 +5,9 @@ pipeline {
        IMAGE_TAG = "tagname"
         DOCKER_CREDENTIALS_ID = "dockerhub-credentials"
     }
+     tools {
+        jdk 'jdk17'
+    }
 
     stages {
         stage('Checkout') {
