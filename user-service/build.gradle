@@ -13,34 +13,34 @@ repositories {
 def lombokVersion = '1.18.26'
 
 dependencies {
-    api libs.org.springframework.boot.spring.boot.starter
-    api libs.org.springframework.boot.spring.boot.starter.actuator
-    api libs.org.springframework.cloud.spring.cloud.starter.circuitbreaker.resilience4j
-    api libs.io.micrometer.micrometer.registry.prometheus
-    api libs.org.springframework.cloud.spring.cloud.sleuth.zipkin
-    api libs.org.springframework.cloud.spring.cloud.starter.sleuth
-    api libs.org.springframework.boot.spring.boot.configuration.processor
-    api libs.com.fasterxml.jackson.datatype.jackson.datatype.jsr310
-    api libs.org.springdoc.springdoc.openapi.ui
-    api libs.org.springframework.cloud.spring.cloud.starter
-    api libs.org.springframework.cloud.spring.cloud.starter.config
-    api libs.org.springframework.boot.spring.boot.starter.data.jpa
-    api libs.org.springframework.boot.spring.boot.starter.thymeleaf
-    api libs.org.springframework.boot.spring.boot.starter.validation
-    api libs.org.springframework.boot.spring.boot.starter.web
-    api libs.org.flywaydb.flyway.core
-    api libs.org.springframework.cloud.spring.cloud.starter.netflix.eureka.client
+    api 'org.springframework.boot:spring-boot-starter'
+    api 'org.springframework.boot:spring-boot-starter-actuator'
+    api 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
+    api 'io.micrometer:micrometer-registry-prometheus'
+    api 'org.springframework.cloud:spring-cloud-starter-sleuth-zipkin'
+    api 'org.springframework.cloud:spring-cloud-starter-sleuth'
+    api 'org.springframework.boot:spring-boot-configuration-processor'
+    api 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    api 'org.springdoc:springdoc-openapi-ui'
+    api 'org.springframework.cloud:spring-cloud-starter'
+    api 'org.springframework.cloud:spring-cloud-starter-config'
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    api 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    api 'org.springframework.boot:spring-boot-starter-validation'
+    api 'org.springframework.boot:spring-boot-starter-web'
+    api 'org.flywaydb:flyway-core'
+    api 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
     compileOnly "org.projectlombok:lombok:$lombokVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
-    runtimeOnly libs.org.springframework.boot.spring.boot.devtools
-    runtimeOnly libs.com.h2database.h2
-    runtimeOnly libs.mysql.mysql.connector.java
+    runtimeOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'mysql:mysql-connector-java'
 
-    testImplementation libs.org.springframework.boot.spring.boot.starter.test
-    testImplementation libs.org.testcontainers.junit.jupiter
-    testImplementation libs.org.testcontainers.mysql
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:mysql'
 
     testCompileOnly "org.projectlombok:lombok:$lombokVersion"
     testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
