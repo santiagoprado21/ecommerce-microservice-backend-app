@@ -2,21 +2,15 @@ pipeline {
     agent {
         docker {
             image 'openjdk:17-jdk'
-            args '-u root:root'  // Opcional, si necesitas permisos root
+            args '-u root:root'
         }
     }
     environment {
         IMAGE_NAME = "santiagoprado21/santiagoprado21-user-service-container"
-        // Usa un tag dinámico con fecha y hora para evitar conflictos
         IMAGE_TAG = "${env.BUILD_ID ?: 'latest'}"
         DOCKER_CREDENTIALS_ID = "dockerhub-credentials"
     }
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/santiagoprado21/ecommerce-microservice-backend-app.git'
-            }
-        }
         stage('Check Java Version') {
             steps {
                 sh 'java -version'
