@@ -8,9 +8,9 @@ pipeline {
         }
         stage('Build & Test') {
             steps {
-                // Forzar que el resultado de la compilación sea "SUCCESS" incluso si falla
                 script {
                     try {
+                        // Este paso intentará ejecutar la compilación, pero si falla, ignorará el error
                         sh './gradlew clean build'
                     } catch (Exception e) {
                         echo "Build failed, but continuing..."
@@ -20,16 +20,17 @@ pipeline {
         }
         stage('Force Success') {
             steps {
-                // Forzar el estado del pipeline a "SUCCESS"
                 script {
+                    // Forzamos el estado a "SUCCESS" sin importar lo anterior
                     currentBuild.result = 'SUCCESS'
-                    echo "Forzando el éxito en el pipeline"
+                    echo "Forzando el estado a SUCCESS (verde)"
                 }
             }
         }
     }
     post {
         always {
+            // Este paso siempre se ejecuta, sin importar el estado final del pipeline
             echo "Este paso siempre se ejecuta, sin importar el estado anterior."
         }
     }
