@@ -7,6 +7,14 @@ pipeline {
     }
 
     stages {
+        stage('Verify Java Version') {
+            steps {
+                script {
+                    // Ejecuta el comando java -version para ver qué versión de Java se está utilizando
+                    sh 'java -version'
+                }
+            }
+        }
         stage('Checkout') {
             steps {
                 git 'https://github.com/santiagoprado21/ecommerce-microservice-backend-app.git'
@@ -43,5 +51,5 @@ pipeline {
             }
         }
     }
-    
+
 }
