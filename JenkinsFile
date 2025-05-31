@@ -18,7 +18,9 @@ pipeline {
         }
         stage('Prepare') {
             steps {
-                sh 'chmod +x user-service/gradlew'
+                dir('user-service') {
+                    sh 'chmod +x gradlew || true'
+                }
             }
         }
         stage('Build & Test') {
@@ -30,10 +32,8 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                dir('user-service') {
-                    script {
-                        docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
-                    }
+                script {
+                    docker.build("${IMAGE_NAME}:${IMAGE_TAG}", "user-service")
                 }
             }
         }
