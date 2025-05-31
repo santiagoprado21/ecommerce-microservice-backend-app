@@ -6,7 +6,7 @@ pipeline {
         IMAGE_TAG = "0.0.1"
         DOCKER_CREDENTIALS_ID = "dockerhub-credentials"
         // Configura Java 17 en el entorno si es necesario
-        JAVA_HOME = 'C:\Java\jdk-17.0.15+6'  // Cambia esto según tu entorno
+        JAVA_HOME = 'C:\\Java\\jdk-17.0.15+6'  // Cambia esto según tu entorno
         PATH = "${JAVA_HOME}/bin:${PATH}"
     }
 
@@ -23,6 +23,20 @@ pipeline {
             steps {
                 // Realiza el checkout del código fuente desde el repositorio
                 git 'https://github.com/santiagoprado21/ecommerce-microservice-backend-app.git'
+            }
+        }
+        stage('Prepare') {
+            steps {
+                // Asegúrate de que el script de Gradle sea ejecutable
+                sh 'chmod +x user-service/gradlew'
+            }
+        }
+        stage('Build & Test') {
+            steps {
+                dir('user-service') {
+                    // Realiza la compilación y las pruebas utilizando Gradle
+                    sh './gradlew clean build'
+                }
             }
         }
         stage('Build Docker Image') {
