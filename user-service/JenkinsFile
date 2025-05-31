@@ -1,33 +1,40 @@
 pipeline {
     agent any
+
     environment {
-       IMAGE_NAME = "santiagoprado21/santiagoprado21-user-service-container"
-       IMAGE_TAG = "0.0.1"
-       DOCKER_CREDENTIALS_ID = "dockerhub-credentials"
+        IMAGE_NAME = "santiagoprado21/santiagoprado21-user-service-container"
+        IMAGE_TAG = "0.0.1"
+        DOCKER_CREDENTIALS_ID = "dockerhub-credentials"
+        // Configura Java 17 en el entorno si es necesario
+        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk'  // Cambia esto según tu entorno
+        PATH = "${JAVA_HOME}/bin:${PATH}"
     }
 
     stages {
         stage('Verify Java Version') {
             steps {
                 script {
-                    // Ejecuta el comando java -version para ver qué versión de Java se está utilizando
+                    // Verifica la versión de Java utilizada en el nodo de Jenkins
                     sh 'java -version'
                 }
             }
         }
         stage('Checkout') {
             steps {
+                // Realiza el checkout del código fuente desde el repositorio
                 git 'https://github.com/santiagoprado21/ecommerce-microservice-backend-app.git'
             }
         }
         stage('Prepare') {
             steps {
+                // Asegúrate de que el script de Gradle sea ejecutable
                 sh 'chmod +x user-service/gradlew'
             }
         }
         stage('Build & Test') {
             steps {
                 dir('user-service') {
+                    // Realiza la compilación y las pruebas utilizando Gradle
                     sh './gradlew clean build'
                 }
             }
@@ -36,6 +43,7 @@ pipeline {
             steps {
                 dir('user-service') {
                     script {
+                        // Construye la imagen de Docker usando el archivo Dockerfile en el directorio user-service
                         docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
                     }
                 }
@@ -44,6 +52,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
+                    // Realiza el push de la imagen Docker al DockerHub usando las credenciales configuradas
                     docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
                         docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
                     }
@@ -51,5 +60,4 @@ pipeline {
             }
         }
     }
-
 }
