@@ -6,7 +6,7 @@ pipeline {
         IMAGE_TAG = "0.0.1"
         DOCKER_CREDENTIALS_ID = "dockerhub-credentials"
         // Configura Java 17 en el entorno si es necesario
-        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk'  // Cambia esto según tu entorno
+        JAVA_HOME = 'C:\Java\jdk-17.0.15+6'  // Cambia esto según tu entorno
         PATH = "${JAVA_HOME}/bin:${PATH}"
     }
 
