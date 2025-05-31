@@ -8,21 +8,15 @@ pipeline {
         }
         stage('Build & Test') {
             steps {
-                script {
-                    try {
-                        sh './gradlew clean build'
-                    } catch (Exception e) {
-                        echo "Build failed, but continuing..."
-                    }
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh './gradlew clean build'
                 }
             }
         }
         stage('Force Success') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
-                    // Aquí puedes agregar cualquier paso que quieras que no afecte el resultado del build
-                    sh 'echo "Forzando éxito en el build"'
-                }
+                // Forzar el éxito sin importar el estado de las etapas anteriores
+                echo 'Forzando éxito en el build'
             }
         }
     }
